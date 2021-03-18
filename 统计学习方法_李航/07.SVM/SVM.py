@@ -7,10 +7,10 @@ from rich.console import Console
 from rich.table import Table
 from functools import partial
 sys.path.append(str(Path(os.path.abspath(__file__)).parent.parent))
-from utils import wbline
+from utils import wbline, gaussian_kernel
 
 class SVM:
-    def __init__(self, C=1e9, epsilon=1e-6, lr=1e-4, max_steps=1000, verbose=True, kernel=np.dot):
+    def __init__(self, C=1e9, epsilon=1e-6, lr=1e-4, max_steps=1000, verbose=True, kernel=np.dot): #np.dot 自定义核函数
         """
         kernel: kernel function, of which
                 the input is two vectors a, b
@@ -19,11 +19,12 @@ class SVM:
         self.lr = lr
         self.max_steps = max_steps
         self.verbose = verbose
-        self.C = C
+        self.C = C # 惩罚项
         self.epsilon = epsilon
-        self.kernel = kernel
+        self.kernel = kernel # 核函数
 
-    def _smo_objective(self, i, j):
+    # Sequential minimal optimization
+    def _smo_objective(self, i, j): # define 目标函数
         """
         The objective function of one step of SMO
         given the choosed alpha i and alpha j
@@ -151,49 +152,93 @@ class SVM:
         pred = (score >= 0).astype(int) * 2 - 1
         return pred
 
+def demonstrate(X, Y, desc, draw=True, **args): # **args 不定参数
+    '''
+    args 和 **kwargs 主要用于函数定义。 你可以将不定数量的参数传递给一个函数。
+    这里的不定的意思是：预先并不知道, 函数使用者会传递多少个参数给你, 所以在这个场景下使用这两个关键字。 
+    *args 是用来发送一个非键值对的可变数量的参数列表给一个函数.
+    kwargs 允许你将不定长度的键值对, 作为参数传递给一个函数。 
+    如果你想要在一个函数里处理带名字的参数, 你应该使用kwargs。
+    '''
+    console = Console(markup=False)
+    svm = SVM(verbose=True, **args)
+    svm.fit(X, Y)
+
+    # plot
+    if draw:
+        plt.scatter(X[:, 0], X[:, 1], c=Y)
+        wbline(svm.w, svm.b)
+        plt.title(desc)
+        plt.show()
+
+    # show in table
+    pred = svm.predict(X)
+    table = Table('x', 'y', 'pred')
+    for x, y, y_hat in zip(X, Y, pred):
+        table.add_row(*map(str, [x, y, y_hat]))
+    console.print(table)
+
 if __name__ == "__main__":
-    def demonstrate(X, Y, desc, draw=True, **args):
-        console = Console(markup=False)
-        svm = SVM(verbose=True, **args)
-        svm.fit(X, Y)
-
-        # plot
-        if draw:
-            plt.scatter(X[:, 0], X[:, 1], c=Y)
-            wbline(svm.w, svm.b)
-            plt.title(desc)
-            plt.show()
-
-        # show in table
-        pred = svm.predict(X)
-        table = Table('x', 'y', 'pred')
-        for x, y, y_hat in zip(X, Y, pred):
-            table.add_row(*map(str, [x, y, y_hat]))
-        console.print(table)
 
     # -------------------------- Example 1 ----------------------------------------
-    print("Example 1:")
-    X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
-    Y = np.array([1, 1, -1, -1])
-    demonstrate(X, Y, "Example 1")
+    # print("Example 1:")
+    # X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
+    # Y = np.array([1, 1, -1, -1])
+    # demonstrate(X, Y, "Example 1")
 
-    # -------------------------- Example 2 ----------------------------------------
-    print("Example 2:")
-    X = np.concatenate((np.random.rand(5, 2), np.random.rand(5, 2) + np.array([1, 1])), axis=0)
-    Y = np.array([1, 1, 1, 1, 1, -1, -1, -1, -1, -1])
-    print(X, Y)
-    demonstrate(X, Y, "Example 2: randomly generated data")
+    # # -------------------------- Example 2 ----------------------------------------
+    # print("Example 2:")
+    # X = np.concatenate((np.random.rand(5, 2), np.random.rand(5, 2) + np.array([1, 1])), axis=0)
+    # Y = np.array([1, 1, 1, 1, 1, -1, -1, -1, -1, -1])
+    # print(X, Y)
+    # demonstrate(X, Y, "Example 2: randomly generated data")
 
     # ---------------------- Example 3 --------------------------------------------
-    print("Example 3:")
-    X = np.array([[0, 0], [1, 1], [1, 0], [0, 1]])
-    Y = np.array([1, 1, -1, -1])
-    demonstrate(X, Y, "Example 3: SVM with dot kernel cannot sovle XOR problem", C=1)
+    # print("Example 3:")
+    # X = np.array([[0, 0], [1, 1], [1, 0], [0, 1]])
+    # Y = np.array([1, 1, -1, -1])
+    # demonstrate(X, Y, "Example 3: SVM with dot kernel(cannot solve XOR problem)", C=1)
 
     # ---------------------- Example 4 --------------------------------------------
-    def gaussian_kernel(x, y):
-        return np.exp(-((x - y) ** 2).sum())
+
+
     print("Example 4:")
-    X = np.array([[0, 0], [1, 1], [1, 0], [0, 1]])
-    Y = np.array([1, 1, -1, -1])
-    demonstrate(X, Y, "Example 4: SVM with dot kernel cannot sovle XOR problem", draw=False, kernel=gaussian_kernel)
+    np.random.seed(0)
+    X = np.random.randn(20, 2)
+    Y = np.logical_xor(X[:, 0] > 0, X[:, 1] > 0)
+    demonstrate(X, Y, "Example 4: SVM with Gaussian kernel", draw=True, C= 1, kernel=gaussian_kernel) # 高斯核函数
+
+    '''
+    使用何种核函数解决异或问题？
+     高斯核（也叫径向基函数核，RBF），调整C值
+    '''
+
+    from sklearn import svm 
+    
+    xx, yy = np.meshgrid(np.linspace(-3, 3, 500),
+                        np.linspace(-3, 3, 500))
+    np.random.seed(0)
+    X = np.random.randn(20, 2)
+    Y = np.logical_xor(X[:, 0] > 0, X[:, 1] > 0)
+    Y = np.where(Y,1,-1)
+    # fit the model
+    clf = svm.NuSVC()
+    clf.fit(X, Y) 
+    #plot the decision function for each datapoint on the grid
+    Z = clf.decision_function(np.c_[xx.ravel(), yy.ravel()])
+    Z = Z.reshape(xx.shape)
+
+    plt.imshow(Z, interpolation='nearest',
+            extent=(xx.min(), xx.max(), yy.min(), yy.max()), 
+            aspect='auto',
+            origin='lower', 
+            cmap=plt.cm.PuOr_r)
+
+    contours = plt.contour(xx, yy, Z, levels=[0], 
+                        linewidths=2,linetypes='-')
+    plt.scatter(X[:, 0], X[:, 1], s=30, c=Y, 
+                cmap=plt.cm.Paired,edgecolors='k')
+    plt.xticks(())
+    plt.yticks(())
+    plt.axis([-3, 3, -3, 3])
+    plt.show()

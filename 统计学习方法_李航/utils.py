@@ -42,6 +42,9 @@ class Heap:
         return heapq.heappop(self.h)[-1]
 
 # ------------------ Functions ------------------------------------------------
+def gaussian_kernel(x, y):
+    return np.exp(-((x - y) ** 2).sum())
+
 def argmax(arr, key=lambda x: x):
     arr = [key(a) for a in arr]
     ans = max(arr)
