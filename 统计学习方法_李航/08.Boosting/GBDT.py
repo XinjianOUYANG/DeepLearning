@@ -8,9 +8,11 @@ from rich.table import Table
 from functools import partial
 sys.path.append(str(Path(os.path.abspath(__file__)).parent.parent))
 from utils import line_search
+# 添加系统路径
 sys.path.append(str(Path(os.path.abspath(__file__)).parent.parent / '5.DecisionTree'))
 from RegressionCART import RegressionCART
 
+# 回归问题的提升树算法
 class GBDT:
     def __init__(self,
                  loss_function=lambda label, pred: ((label - pred) ** 2).sum(),
@@ -23,7 +25,7 @@ class GBDT:
         `gradient_function` is gradient from loss function to the prediction
         It takes two arguments, i.e., label and pred and return the gradient
         the loss function should be convex
-        The default loss function is l2 loss, which makes GBDT an ordinary boosting tree
+        The default loss function is L2 loss, which makes GBDT an ordinary boosting tree
         """
         self.steps = steps
         self.verbose = verbose
