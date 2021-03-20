@@ -10,6 +10,7 @@ from functools import partial
 sys.path.append(str(Path(os.path.abspath(__file__)).parent.parent))
 from utils import wbline
 
+# Adaboost 算法, 参考 https://blog.csdn.net/Daycym/article/details/82053452
 class DecisionStump:
     """
     A simple classifier.
@@ -21,8 +22,9 @@ class DecisionStump:
 
     def fit(self, X, Y, weight):
         # since X is one-dimensional, just flatten it
+        # flatten !!
         X = X[:, 0]
-        possible_thresholds = list(set(X))
+        possible_thresholds = list(set(X)) # 可能的阈值??
         possible_thresholds.append(max(possible_thresholds) + 1)
         possible_thresholds.append(min(possible_thresholds) - 1)
         # try all possible threshold

@@ -9,13 +9,13 @@ from functools import partial
 sys.path.append(str(Path(os.path.abspath(__file__)).parent.parent))
 from utils import line_search
 # 添加系统路径
-sys.path.append(str(Path(os.path.abspath(__file__)).parent.parent / '5.DecisionTree'))
+sys.path.append(str(Path(os.path.abspath(__file__)).parent.parent / '05.DecisionTree'))
 from RegressionCART import RegressionCART
 
-# 回归问题的提升树算法
+# 回归问题的提升树算法:  an ordinary boosting tree
 class GBDT:
     def __init__(self,
-                 loss_function=lambda label, pred: ((label - pred) ** 2).sum(),
+                 loss_function=lambda label, pred: ((label - pred) ** 2).sum(), # lambda 函数!!, label?
                  gradient_function=lambda label, pred: 2 * (pred - label),
                  steps=10,
                  max_depth=3,
@@ -39,7 +39,7 @@ class GBDT:
         `Y` is a vector of labels
         `c` is a constant scalar
         """
-        c = (np.ones_like(Y) * c).astype(float)
+        c = (np.ones_like(Y) * c).astype(float) # astype
         return self.loss_function(Y, c)
 
     def fit(self, X, Y):
