@@ -27,11 +27,11 @@ class GBDT:
         the loss function should be convex
         The default loss function is L2 loss, which makes GBDT an ordinary boosting tree
         """
-        self.steps = steps
+        self.steps = steps # 迭代次数
         self.verbose = verbose
         self.gradient_function = gradient_function
         self.loss_function = loss_function
-        self.max_depth = max_depth
+        self.max_depth = max_depth # 回归树的深度
 
     def _loss_of_const(self, Y, c):
         """
@@ -44,7 +44,7 @@ class GBDT:
 
     def fit(self, X, Y):
         n = len(X)
-        self.carts = []
+        self.carts = [] #树的集合
         # the basic value of prediction, so that there can be 'residual'
         self.basic_pred = line_search(partial(self._loss_of_const, Y), min(Y), max(Y))
         # line_search: find the minimum point of a convex function
@@ -55,8 +55,8 @@ class GBDT:
         for i in range(self.steps):
             if self.verbose:
                 print(f'step {i}')
-                print(f'Current pred is {cur_pred}')
-                print(f'Current residual is {residual}')
+                print(f'Current pred is \n {cur_pred}')
+                print(f'Current residual is \n {residual}')
             cart = RegressionCART(verbose=False, max_depth=self.max_depth)
             cart.fit(X, residual) # 拟合残差，学习一个回归树
             self.carts.append(cart)
@@ -72,10 +72,10 @@ class GBDT:
                 leaf_cur_pred = cur_pred[data_ind]
                 leaf.label = line_search(lambda c: self.loss_function(leafY, leaf_cur_pred + c), -1e9, 1e9)
 
-            # update the incremental prediction
+            # update the incremental prediction 累计预测
             inc_pred = cart.predict(X)
             cur_pred += inc_pred
-            residual = -self.gradient_function(Y, cur_pred)
+            residual = -self.gradient_function(Y, cur_pred) # gradient_function=lambda label, pred: 2 * (pred - label)
 
     def predict(self, X):
         pred = np.zeros(len(X)) + self.basic_pred

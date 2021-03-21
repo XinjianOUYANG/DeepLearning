@@ -23,7 +23,7 @@ class GMM:
             # Expectation step
             posterior = self.predict(X)
 
-            # Maximization step
+            # Maximization step \换行符
             self.mean = (posterior[:, :, None] * X[None, :, :]).sum(axis=1) / \
                 (posterior.sum(axis=1)[:, None] + self.epsilon)
             var = (posterior[:, :, None] * (X[None, :, :] - self.mean[:, None, :]) ** 2).sum(axis=1) / \
@@ -54,7 +54,7 @@ class GMM:
 
 if __name__ == '__main__':
     def demonstrate(desc, X):
-        gmm = GMM(3)
+        gmm = GMM(3) # k=3，有3类
         gmm.fit(X)
         pred = gmm.predict(X).T
         plt.scatter(X[:, 0], X[:, 1], color=pred)
@@ -70,7 +70,7 @@ if __name__ == '__main__':
     demonstrate("Example 1", X)
 
     # ---------------------- Example 2---------------------------------------------
-    demonstrate("Example 2: GMM does'nt promise the same result for the same data", X)
+    demonstrate("Example 2: GMM doesn't promise the same result for the same data", X)
 
     # ---------------------- Example 3---------------------------------------------
     X = np.concatenate([
