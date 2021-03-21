@@ -15,8 +15,8 @@ from RegressionCART import RegressionCART
 # 回归问题的提升树算法:  an ordinary boosting tree
 class GBDT:
     def __init__(self,
-                 loss_function=lambda label, pred: ((label - pred) ** 2).sum(), # lambda 函数!!, label?
-                 gradient_function=lambda label, pred: 2 * (pred - label),
+                 loss_function=lambda label, pred: ((label - pred) ** 2).sum(), # lambda 函数!!, L2 loss function
+                 gradient_function=lambda label, pred: 2 * (pred - label), # gradient
                  steps=10,
                  max_depth=3,
                  verbose=True):
@@ -47,6 +47,7 @@ class GBDT:
         self.carts = []
         # the basic value of prediction, so that there can be 'residual'
         self.basic_pred = line_search(partial(self._loss_of_const, Y), min(Y), max(Y))
+        # line_search: find the minimum point of a convex function
 
         cur_pred = np.zeros_like(Y) + self.basic_pred
         residual = -self.gradient_function(Y, cur_pred)
