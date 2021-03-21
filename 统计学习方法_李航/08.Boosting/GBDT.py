@@ -12,7 +12,7 @@ from utils import line_search
 sys.path.append(str(Path(os.path.abspath(__file__)).parent.parent / '05.DecisionTree'))
 from RegressionCART import RegressionCART
 
-# 回归问题的提升树算法:  an ordinary boosting tree
+# 梯度提升决策树（Gradient Boosting Decision Tree, GDBT）
 class GBDT:
     def __init__(self,
                  loss_function=lambda label, pred: ((label - pred) ** 2).sum(), # lambda 函数!!, L2 loss function
@@ -50,14 +50,15 @@ class GBDT:
         # line_search: find the minimum point of a convex function
 
         cur_pred = np.zeros_like(Y) + self.basic_pred
-        residual = -self.gradient_function(Y, cur_pred)
+        # 采用负梯度来近似求解残差
+        residual = -self.gradient_function(Y, cur_pred) 
         for i in range(self.steps):
             if self.verbose:
                 print(f'step {i}')
                 print(f'Current pred is {cur_pred}')
                 print(f'Current residual is {residual}')
             cart = RegressionCART(verbose=False, max_depth=self.max_depth)
-            cart.fit(X, residual)
+            cart.fit(X, residual) # 拟合残差，学习一个回归树
             self.carts.append(cart)
             # regression trees use l2 loss as loss function,
             # the return value leaf nodes should be recorrect
