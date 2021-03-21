@@ -2,7 +2,9 @@ import numpy as np
 from rich.console import Console
 from rich.table import Table
 
-def forward(state2state, state2observation, initial_state, observation):
+# 隐马尔可夫的概率计算问题： 前向算法
+# 给定模型lamda和观测序列O，计算在模型lamda下观测序列O出现的概率P(O|lamda)
+def forward(state2state, state2observation, initial_state, observation): # A，B, pi, O
     """
     Given a HMM with parameter (state2state, state2observation, initial_state)
     and the observation,
@@ -15,7 +17,7 @@ def forward(state2state, state2observation, initial_state, observation):
 
     where
 
-    data_size is the number of all the data initial_stateeces
+    data_size is the number of all the data initial states
     state_size is the number of all the possible states
     observation_size is the number of all the possible observations
     sequence_length is the length of each sequence
@@ -28,7 +30,7 @@ def forward(state2state, state2observation, initial_state, observation):
     data_size, sequence_length = observation.shape
 
     seq_state_prob = np.zeros([data_size, sequence_length, state_size])
-    state_prob = initial_state[None, :]
+    state_prob = initial_state[None, :] # c初始状态Pi
     for i, o in enumerate(observation.T):
         # given the parameters of HMM, get the probability of this state with the previous observation
         state_prob = state_prob * state2observation.T[o]

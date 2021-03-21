@@ -8,6 +8,7 @@ from pathlib import Path
 sys.path.append(str(Path(os.path.abspath(__file__)).parent.parent))
 from utils import softmax, line_search
 
+# 最大熵模型： https://zhuanlan.zhihu.com/p/29978153
 class MaxEntropy:
     def __init__(self, epsilon=1e-6, max_steps=1000, verbose=True):
         self.epsilon = epsilon
@@ -85,6 +86,7 @@ class MaxEntropy:
             B_delta_w = B @ delta_w
             B += np.outer(delta_g, delta_g) / (delta_g @ delta_w) - \
                 np.outer(B_delta_w, B_delta_w) / (B_delta_w.T @ delta_w)
+            # np.outer: Compute the outer product of two vectors.
         self.p_w = self._p_w(self.w)
 
     def predict(self, x, y):
