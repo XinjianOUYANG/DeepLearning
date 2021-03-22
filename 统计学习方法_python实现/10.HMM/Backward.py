@@ -2,6 +2,8 @@ import numpy as np
 from rich.console import Console
 from rich.table import Table
 
+# 隐马尔可夫的概率计算问题： 后向算法
+# 给定模型lamda和观测序列O，计算在模型lamda下观测序列O出现的概率P(O|lamda)
 def backward(state2state, state2observation, initial_state, observation):
     """
     Given a HMM with parameter (state2state, state2observation, initial_state)
