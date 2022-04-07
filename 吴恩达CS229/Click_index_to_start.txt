@@ -1,0 +1,4 @@
+Open index.html to launch. 
+Please note that the video links will only work with a live network connection.
+
+https://see.stanford.edu/Course/CS229
